@@ -5,9 +5,7 @@
 		<view class="container">
 			<loading v-if="isLoadShow" />
 			<!-- 主体部分 -->
-			<view
-				class="content"
-				>
+			<view class="content">
 				<view class="scroll-content">
 					<view>
 						<!-- 进入刷新 -->
@@ -56,11 +54,9 @@
 		<backtop v-if="false" />
 		<!-- #endif -->
 		<!-- #ifdef H5 -->
-		<transition name="fade">
-			<backtop  v-show="showBackTop"  />
-		</transition>
+		<transition name="fade"><backtop v-show="showBackTop" /></transition>
 		<!-- #endif -->
-		
+
 		<!-- <footers></footers> -->
 
 		<!-- <button @click="test">点击我有惊喜</button> -->
@@ -75,7 +71,6 @@ import backtop from 'components/common/backtop.vue';
 import footers from 'components/common/footer.vue';
 import { getHomeData, getDetailData } from 'network/home.js';
 
-
 const util = require('static/assets/js/util.js');
 
 export default {
@@ -85,7 +80,7 @@ export default {
 		return {
 			page: 1,
 			tab: 'all',
-			top:0,
+			top: 0,
 			homeData: [],
 			showBackTop: false,
 			isLoadShow: true,
@@ -107,18 +102,19 @@ export default {
 			return this.homeData;
 		}
 	},
-	onPullDownRefresh(){//这里触发更新页面
-		setTimeout(()=>{
-			this.refresh()
-			uni.stopPullDownRefresh()
-		},1500)
-		
+	onPullDownRefresh() {
+		//这里触发更新页面
+		setTimeout(() => {
+			this.refresh();
+			uni.stopPullDownRefresh();
+		}, 1500);
 	},
-		
-	onReachBottom(){//这里触发刷新下一页
-		this.loadMore()
+
+	onReachBottom() {
+		//这里触发刷新下一页
+		this.loadMore();
 	},
-	onPageScroll(e){
+	onPageScroll(e) {
 		this.showBackTop = e.scrollTop > 500;
 	},
 	methods: {
@@ -126,10 +122,10 @@ export default {
 			this.isRefresh = true;
 			this.getData();
 		},
-		goTop(e){
+		goTop(e) {
 			uni.pageScrollTo({
-				scrollTop:0
-			})
+				scrollTop: 0
+			});
 		},
 
 		getData(page) {
@@ -180,7 +176,7 @@ export default {
 };
 </script>
 
-<style >
+<style>
 .container {
 	height: 100%;
 	display: flex;
@@ -306,18 +302,20 @@ export default {
 	border-radius: 20px;
 	margin-left: -50px;
 }
-.author-face::after{
+.author-face::after {
 	overflow: hidden;
 }
 
 .text {
 	display: flex;
 	justify-content: space-between;
+	/* color: #ccc; */
 	padding: 10px 5px;
 	line-height: 20px;
 }
 .time {
 	width: 60%;
+	color: #ccc;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

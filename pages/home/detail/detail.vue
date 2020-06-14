@@ -1,5 +1,6 @@
 <template>
 	<view>
+		
 		<view class="container">
 			<view class="title">
 				<span>{{ article.title }}</span>
@@ -8,10 +9,10 @@
 				<image class="author-face" :src="article.author.avatar_url" />
 
 				<view class="text">
-					<span>作者：{{ article.author.loginname }}</span>
+					<span style="color: #007AFF;" @tap='handleDetail(article.author.loginname)'>作者：{{ article.author.loginname }}</span>
 					<span>发布于：{{ article.create_at }}</span>
 					<span>浏览次数：{{ article.visit_count }}</span>
-					<span>最后一次编辑：{{ article.last_reply_at }}</span>
+					<span style="color: #DCDCDC;">最后一次编辑：{{ article.last_reply_at }}</span>
 					<!-- <span class="article.tab">来自：{{article.tabspan}}</span> -->
 				</view>
 				<view class="mark" v-if="article.mark">{{ article.mark }}</view>
@@ -21,18 +22,26 @@
 				<rich-text class="markdown-body" :nodes="article.content"></rich-text>
 			</view>
 			<view class="reply" v-if="article.replies.length > 0">
-				<view v-for="reply in article.replies" :key="reply.index">
+				<view v-for="(reply, index) in article.replies" :key="reply.id">
 					<view class="reply-item">
-						<view class="reply-first">
+						<view class="reply-first"  @tap='handleDetail(reply.author.loginname)'>
 							<image class="reply-author-face" :src="reply.author.avatar_url" />
 							<view class="reply-info">
 								<view class="reply-name">{{ reply.author.loginname }}</view>
 								<view class="reply-time">{{ reply.create_at }}</view>
 							</view>
+							<view class="floor">#{{ index }}</view>
 						</view>
 						<view class="reply-two ">
 							<!-- <u-parse :content="reply.content" /> -->
 							<rich-text class="reply-content markdown-body" :nodes="reply.content"></rich-text>
+							
+							<image class="comment-icon" src="../../../static/share.png" mode=""></image>
+							<text class="comment-icon">
+								{{reply.ups.length}}
+							</text>
+							<image class="comment-icon" src="../../../static/good.png" mode=""></image>
+							
 						</view>
 					</view>
 				</view>
@@ -44,20 +53,17 @@
 			<!-- #ifdef H5 -->
 			<transition name="fade"><backtop v-show="isShow" /></transition>
 			<!-- #endif -->
-			
 		</view>
 	</view>
 </template>
 
 <script>
-	
-	
-import headers from 'components/common/headers';
-import loading from 'components/common/loading';
-import backtop from 'components/common/backtop';
-import uParse from '@/components/u-parse/u-parse.vue'
+import headers from 'components/common/headers.vue';
+import loading from 'components/common/loading.vue';
+import backtop from 'components/common/backtop.vue';
+import uParse from '@/components/u-parse/u-parse.vue';
 
-import marked from 'marked'
+import marked from 'marked';
 import { getHomeData, getDetailData } from 'network/home.js';
 
 const util = require('static/assets/js/util.js');
@@ -75,7 +81,6 @@ export default {
 		this.topicId = e.id;
 	},
 	mounted() {
-		// window.addEventListener('scroll', this.getScroll);
 		this.getData();
 		setTimeout(() => {
 			this.isLoadShow = false;
@@ -85,12 +90,14 @@ export default {
 		// window.removeEventListener('scroll', this.getScroll);
 	},
 	onPageScroll(e) {
-		if(e.scrollTop>=500){
-			this.isShow=true
-		}else {
-			this.isShow=false
-		}
 		
+		this.isShow= e.scrollTop>=500
+		// if (e.scrollTop >= 500) {
+		// 	this.isShow = true;
+		// } else {
+		// 	this.isShow = false;
+		// }
+
 		// console.log("滚动距离为：" + e.scrollTop);
 	},
 	data() {
@@ -105,20 +112,20 @@ export default {
 			}
 		};
 	},
-	
+
 	methods: {
 		getData() {
 			let topicId = this.topicId;
 			getDetailData(topicId, res => {
 				this.article = res.data;
 				// console.log(this)
-				this.article.content=marked(this.article.content)
+				this.article.content = marked(this.article.content);
 				this.article.create_at = util.formatTime(new Date(this.article.create_at));
 				const last_reply_at = new Date(this.article.last_reply_at);
 				this.article.last_reply_at = !last_reply_at ? this.article.last_reply_at : util.getDateDiff(last_reply_at);
 
 				this.article.replies.map(topic => {
-					topic.content=marked(topic.content)
+					topic.content = marked(topic.content);
 					topic.create_at = util.getDateDiff(new Date(topic.create_at));
 					// const last_reply_at = +new Date(topic.last_reply_at);
 					// topic.last_reply_at = !last_reply_at ? topic.last_reply_at : util.getDateDiff(last_reply_at);
@@ -126,13 +133,18 @@ export default {
 
 				return this.article;
 			});
+		},
+		handleDetail(name){
+			uni.navigateTo({
+				url:`./user?username=${name}`
+			})
 		}
+	
 	}
 };
 </script>
 
-<style >
-	
+<style>
 /* @import '../../static/assets/css/github-markdown.css'; */
 
 .container {
@@ -153,7 +165,11 @@ export default {
 
 .reply-first {
 	display: flex;
-	padding: 10px 5px;
+	padding: 10rpx 5rpx;
+}
+.floor {
+	color: #ccc;
+	font-size: 12px;
 }
 
 /* .reply-first image{
@@ -162,6 +178,16 @@ export default {
 } */
 .reply-two {
 	height: auto;
+}
+
+.comment-icon{
+	float: right;
+	width: 30px;
+	height: 30px;
+	padding: 10rpx;
+}
+.comment-icon:after{
+	clear: both;
 }
 
 .reply-info {
@@ -231,8 +257,9 @@ export default {
 	display: inline-block;
 	width: 45px;
 	height: 45px;
+	background: #ccc;
 	margin-right: 10px;
-	border-radius: 10px;
+	border-radius: 50%;
 }
 
 .reply-name {
@@ -250,7 +277,7 @@ export default {
 	font-size: 100%;
 	/* vertical-align: baseline; */
 	margin: 0;
-	padding: 5px;
+	padding: 5rpx;
 }
 
 .fade-enter-active,
