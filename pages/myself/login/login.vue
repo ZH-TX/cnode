@@ -3,7 +3,7 @@
 
         <view class="page-body">
            <view class="" v-if="!isLogin">
-				<input  class="txt" placeholder="Access Token"v-model="val" />
+				<input  class="txt" placeholder="Access Token" v-model="val" />
 				<button class="btn" @tap="login">登录</button>
            </view>
 		   <view class="" v-else>
@@ -20,7 +20,6 @@
 							用户积分:{{self.score}}
 						</view>
 					</view>
-					
 			    </view>
 			    
 				<view class="detail-info">
@@ -31,10 +30,7 @@
 						回复:{{self.recent_replies}}
 					</view>
 				</view>
-				
-				
-				
-				
+
 				<button class="btn" type="primary" @tap="logout">退出登录</button>
 				
 		   </view>

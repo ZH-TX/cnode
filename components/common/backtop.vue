@@ -30,12 +30,13 @@
     bottom: 15%;
     right: 0;
     width: 25px;
-    color: gray;
+    color: #fff;
+	font-size: 12px;
     padding: 10px 5px 10px 8px;
     text-align: center;
     z-index: 20;
     border-radius: 20px 0 0 20px;
-    background-color: #42b983;
+    background-color: #87C701;
     border: 1px solid #ccc;
     border-right: 0;
 }
