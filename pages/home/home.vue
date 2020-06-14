@@ -5,14 +5,9 @@
 		<view class="container">
 			<loading v-if="isLoadShow" />
 			<!-- 主体部分 -->
-			<scroll-view
+			<view
 				class="content"
-				scroll-y="true"
-				:scroll-top="top"
-				enable-back-to-top="true"
-				@scroll="contentScroll"
-				@scrolltoupper="refresh"
-				@scrolltolower="loadMore">
+				>
 				<view class="scroll-content">
 					<view>
 						<!-- 进入刷新 -->
@@ -54,7 +49,7 @@
 						<view class="refresh-font"><text v-show="isLoadMore">正在加载更多数据...</text></view>
 					</view>
 				</view>
-			</scroll-view>
+			</view>
 			<!-- 回到顶部 -->
 		</view>
 		<!-- #ifdef APP-PLUS||MP -->
@@ -62,7 +57,7 @@
 		<!-- #endif -->
 		<!-- #ifdef H5 -->
 		<transition name="fade">
-			<backtop  v-show="showBackTop"  @click.native="goTop"/>
+			<backtop  v-show="showBackTop"  />
 		</transition>
 		<!-- #endif -->
 		
@@ -107,14 +102,24 @@ export default {
 			this.isLoadShow = false;
 		}, 1500);
 	},
-	mounted() {
-		// console.log('hhh');
-	},
-	updated() {},
 	computed: {
 		showData() {
 			return this.homeData;
 		}
+	},
+	onPullDownRefresh(){//这里触发更新页面
+		setTimeout(()=>{
+			this.refresh()
+			uni.stopPullDownRefresh()
+		},1500)
+		
+	},
+		
+	onReachBottom(){//这里触发刷新下一页
+		this.loadMore()
+	},
+	onPageScroll(e){
+		this.showBackTop = e.scrollTop > 500;
 	},
 	methods: {
 		refresh() {
@@ -122,9 +127,9 @@ export default {
 			this.getData();
 		},
 		goTop(e){
-			console.log(this.top);
-			// console.log(this);
-			// this.top=0;
+			uni.pageScrollTo({
+				scrollTop:0
+			})
 		},
 
 		getData(page) {
@@ -154,10 +159,10 @@ export default {
 				}
 			);
 		},
-		contentScroll(e) {
-			// console.log(e);
-			this.showBackTop = e.detail.scrollTop > 500;
-		},
+		// contentScroll(e) {
+		// 	// console.log(e);
+		// 	this.showBackTop = e.detail.scrollTop > 500;
+		// },
 		// 只会执行一次???
 		loadMore() {
 			this.isLoadMore = true;
