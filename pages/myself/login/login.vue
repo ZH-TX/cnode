@@ -72,7 +72,7 @@
 		},
         data() {
             return {
-				isLogin:false,
+				isLogin:true,
 				self: {},
 				recent:[],
 				currentIndex:0,
@@ -90,6 +90,7 @@
 					let data=res.data
 					
 					if(data.success){
+						data.accesstoken=this.val
 						uni.setStorageSync('user',data)
 						this.isLogin=true //如果需要将下次登录还是存在,需要将状态保存
 						// this.$forceUpdate()	

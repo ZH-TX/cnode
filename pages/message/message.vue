@@ -5,7 +5,7 @@
 		<view class="msg-box" v-if="list.length">
 			<view class="list">
 				<view v-for="(item, index) in list" :key="index">
-					<navigate class="user" :url="'detail/detail?id=' + item.author.loginname">
+					<navigate class="user" :url="'pages/home/detail/detail?id=' + item.author.loginname">
 						<view class="user-headimg" :style="{ backgroundImage: 'url(' + item.author.avatar_url + ')' }"></view>
 					</navigate>
 					<view>
@@ -15,12 +15,12 @@
 						</view>
 						<view v-if="item.type == 'at'">
 							在话题
-							<navigate :url="'detail/detail?id=' + item.topic.id">{{ item.topic.title }}</navigate>
+							<navigate :url="'pages/home/detail/detail?id=' + item.topic.id">{{ item.topic.title }}</navigate>
 							中 @了你
 						</view>
 						<view v-if="item.type == 'reply'">
 							回复你了的话题
-							<navigate :url="'detail/detail?id=' + item.topic.id">{{ item.topic.title }}</navigate>
+							<navigate :url="'pages/home/detail/detail?id=' + item.topic.id">{{ item.topic.title }}</navigate>
 						</view>
 						<view class="markdown-body" v-html="item.reply.content"></view>
 					</view>
@@ -33,40 +33,61 @@
 </template>
 <script>
 import footers from 'components/common/footer';
+import {getDateDiff} from '../../static/assets/js/util.js'
 
 export default {
 	components: {
 		footers
 	},
+	onShow() {
+		this.getCount()
+	},
 	created() {
+		this.token=uni.getStorageSync('user').accesstoken
 		this.getMessage();
+		
 	},
 	data() {
-		return {
-			token: uni.getStorageSync('token'),
+		return {//accesstoken没有存
+			token: uni.getStorageSync('user').accesstoken,
 			list: {}
 		};
 	},
+	filters:{
+		formatDate(e){
+			return getDateDiff(new Date(e))
+		}
+			
+	},
 	methods: {
+		
+		getCount(){
+			//显示角标信息
+			this.$http.get('/message/count',{params:{
+					accesstoken:this.token
+				}}).then(res=>{
+					console.log(res);
+					uni.setTabBarBadge({
+						index:2,
+						text:res.data.data
+					})
+				}).catch(err=>{
+					console.log(err);
+				})
+		},
 		getMessage() {
 			if (this.token) {
-				uni.request({
-					url: `https://cnodejs.org/api/v1/messages?accesstoken=${this.token}`,
-					method: 'GET',
-					data: {},
-					success: res => {
-						console.log(res.data);
-						let data = res.data;
-						this.list = data.data;
-					},
-					fail: () => {},
-					complete: () => {}
-				});
-			} else {
-				uni.showToast({
-					title: '请先登录'
-				});
-			}
+				
+				this.$http.get('/messages',{params:{
+					accesstoken:this.token
+				}}).then(res=>{
+					console.log(res);
+					let data = res.data;
+					this.list = data.data;
+				}).catch(err=>{
+					console.log(err);
+				})
+			}	
 		}
 	}
 };

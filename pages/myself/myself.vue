@@ -58,9 +58,12 @@
 		components: {
 			footers
 		},
+		onShow() {
+			this.self=uni.getStorageSync('user')
+		},
 		data() {
 			return {
-				self: uni.getStorageSync('user')
+				self:{}
 
 			}
 		},
