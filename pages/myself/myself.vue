@@ -68,9 +68,6 @@
 			getDetail(){
 				uni.navigateTo({
 					url: 'login/login',
-					success: res => {},
-					fail: () => {},
-					complete: () => {}
 				});
 				// uni.request({
 				// 	url: `https://cnodejs.org/api/v1/user/${this.self.loginname}`,

@@ -44,7 +44,9 @@
 							<!-- <router-view></router-view> -->
 						</view>
 						<!-- 加载 -->
-						<view class="refresh-font"><text v-show="isLoadMore">正在加载更多数据...</text></view>
+						<view class="refresh-font">
+							<text v-show="isLoadMore">正在加载更多数据...</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -164,7 +166,15 @@ export default {
 			this.isLoadMore = true;
 			this.page += 1;
 			console.log(this.page);
+			uni.showLoading({
+				title: '正在加载中...',
+				mask: false
+			});
 			this.getData(this.page);
+			setTimeout(()=>{
+				uni.hideLoading()
+			},300)
+			
 		},
 
 		changebar(e) {
@@ -226,6 +236,9 @@ export default {
 	background: #80bd01;
 }
 .refresh-font {
+	position: fixed;
+	/* bottom: 10px;
+	padding: 10px; */
 	text-align: center;
 	background: rgb(235, 231, 231);
 }

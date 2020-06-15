@@ -18,8 +18,13 @@
 				<view class="mark" v-if="article.mark">{{ article.mark }}</view>
 			</view>
 			<view class="content">
-				<!-- <u-parse :content="article.content"/> -->
+				<!-- <u-parse  :content="article.content"/> -->
+				<view class="markdown-body" v-html="article.content">
+				</view>
+				<!-- #ifdef APP-PLUS -->
 				<rich-text class="markdown-body" :nodes="article.content"></rich-text>
+				<!-- #endif -->
+				
 			</view>
 			<view class="reply" v-if="article.replies.length > 0">
 				<view v-for="(reply, index) in article.replies" :key="reply.id">
@@ -34,7 +39,14 @@
 						</view>
 						<view class="reply-two ">
 							<!-- <u-parse :content="reply.content" /> -->
-							<rich-text class="reply-content markdown-body" :nodes="reply.content"></rich-text>
+							<view class="reply-content markdown-body" v-html="reply.content">
+								
+							</view>
+							<!-- #ifdef APP-PLUS -->
+							<rich-text class="reply-content markdown-body" :nodes="reply.content">
+							</rich-text>
+							<!-- #endif -->
+							
 							
 							<image class="comment-icon" src="../../../static/share.png" mode=""></image>
 							<text class="comment-icon">
@@ -57,7 +69,7 @@
 	</view>
 </template>
 
-<script>
+<script>//在网页中直接v-html解决
 import headers from 'components/common/headers.vue';
 import loading from 'components/common/loading.vue';
 import backtop from 'components/common/backtop.vue';
@@ -71,7 +83,7 @@ const util = require('static/assets/js/util.js');
 export default {
 	name: 'detail',
 	components: {
-		// VHeader,
+	
 		loading,
 		backtop,
 		uParse
@@ -130,6 +142,12 @@ export default {
 					// const last_reply_at = +new Date(topic.last_reply_at);
 					// topic.last_reply_at = !last_reply_at ? topic.last_reply_at : util.getDateDiff(last_reply_at);
 				});
+				if(this.article.good){
+					this.article.mark = '精华';
+				}
+				if(this.article.top){
+					this.article.mark = '置顶';
+				}
 
 				return this.article;
 			});
@@ -211,9 +229,9 @@ export default {
 	padding: 2px 5px;
 	position: absolute;
 	border: 1px dotted darkred;
-	color: darkred;
+	color: red;
 	font-weight: bold;
-	/* font-size: 80rpx; */
+	font-size: 80rpx;
 	top: 25px;
 	right: 15px;
 	transform: rotate(45deg);

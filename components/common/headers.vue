@@ -22,7 +22,7 @@
 				</view>
 			</view>
 			<view @tap="changeBar" class="menu-icon"><!-- 菜单 --></view>
-			<view>{{ tabName }}</view>
+			<view style="color: #A5CE52;">{{ tabName }}</view>
 			<view>
 				<!-- #ifndef MP -->
 				<navigator  url="../../pages/myself/login/login" class="icon iconfont">&#xe60d;</navigator>

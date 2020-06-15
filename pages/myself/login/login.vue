@@ -22,13 +22,21 @@
 					</view>
 			    </view>
 			    
+				
 				<view class="detail-info">
-					<view class="">
-						主题:{{self.recent_topics}}
+					<view :class="{active:currentIndex==0}" @tap="handleTap(0)">主题:{{ self.recent_topics.length }}</view>
+					<view :class="{active:currentIndex==1}" @tap="handleTap(1)">回复:{{ self.recent_replies.length }}</view>
+					
+				</view>
+				
+				<view class="detail-item" v-for="item in recent" :key="item.id" @tap="navDetail(item.id)">
+					<view class="item-content">
+						{{item.title}}
 					</view>
-					<view class="">	
-						回复:{{self.recent_replies}}
+					<view class="" style="color: #ccc">
+						{{item.last_reply_at| fliter}}
 					</view>
+					
 				</view>
 
 				<button class="btn" type="primary" @tap="logout">退出登录</button>
@@ -49,7 +57,10 @@
         components: {
            
         },
-		onLoad() {
+		async onLoad() {
+			await this.getDetail()
+			this.recent=this.self.recent_topics
+			console.log(this.recent);
 			this.isLogin=uni.getStorageSync('user').success
 			// this.getDetail()
 		},
@@ -62,48 +73,46 @@
         data() {
             return {
 				isLogin:false,
-				self: uni.getStorageSync('user'),
-				val:'ac836285-e3d9-47a1-98a4-9a544736dfee'
+				self: {},
+				recent:[],
+				currentIndex:0,
+				val:'',//ac836285-e3d9-47a1-98a4-9a544736dfee
             }
         },
         methods: {
             login(){
-				uni.setStorageSync('token',this.val)
+				// uni.setStorageSync('token',this.val)
 				this.$http.post('/accesstoken',{},{params:{
-					accesstoken:this.val
-				}
-					
+						accesstoken:this.val
+					}
 				}).then(res => {
-						let data=res.data
-						console.log(res);
-						if(data.success){
-							// 登录之后没哟立即刷新, 这是一个问题
-							// console.log(data);
-							uni.setStorageSync('user',data)
-							
-							this.isLogin=true //如果需要将下次登录还是存在,需要将状态保存
-							// this.$forceUpdate()	
-							this.$nextTick(()=>{
-								this.getDetail()
-							})
-							
-							
-							uni.showToast({
-								title: '登录成功'
-							});
-						}else{
-							uni.showToast({
-								title: data.error_msg,
-								icon:'none'
-							});
-						}
-					}).catch(err=>{
-						console.log(err);
+					console.log(res);
+					let data=res.data
+					
+					if(data.success){
+						uni.setStorageSync('user',data)
+						this.isLogin=true //如果需要将下次登录还是存在,需要将状态保存
+						// this.$forceUpdate()	
+						this.$nextTick(()=>{
+							this.getDetail()
+						})
+
 						uni.showToast({
-							title: err.data.error_msg,
+							title: '登录成功'
+						});
+					}else{
+						uni.showToast({
+							title: data.error_msg,
 							icon:'none'
 						});
-					})
+					}
+				}).catch(err=>{
+					console.log(err);
+					uni.showToast({
+						title: err.data.error_msg,
+						icon:'none'
+					});
+				})
 			},
         
 			logout(){
@@ -114,27 +123,32 @@
 				uni.removeStorageSync('user')
 				
 			},
+			handleTap(e){
+				this.currentIndex=e
+				this.recent=!e?this.self.recent_topics:this.self.recent_replies
+			},
+			navDetail(e){
+				uni.navigateTo({
+					url: `./detail?id=${e}`,
+					success: res => {},
+					
+				});
+			},
 		
-			getDetail(){
-				this.$http.get(`/user/${this.self.loginname}`).then(res=>{
-					console.log(res.data);
+			async getDetail(){
+				let name=uni.getStorageSync('user').loginname
+				await this.$http.get(`/user/${name}`).then(res=>{
+					console.log(res);
+					
 					let data=res.data
-					this.self=data.data
+					if(data.success){
+						this.self=data.data
+					}
+					
 				}).catch(err=>{
 					console.log(err);
 				})
 				
-				// uni.request({
-				// 	url: `https://cnodejs.org/api/v1/user/${this.self.loginname}`,
-				// 	method: 'GET',
-				// 	data: {},
-				// 	success: res => {
-				// 		console.log(res.data);
-				// 		let data=res.data
-				// 		this.self=data.data
-				// 	},
-					
-				// });
 			}
 		},
     }
@@ -142,81 +156,91 @@
 
 <style >
     .page-body {
-        /* padding: 50px 15px; */
-        min-height: 400px;
-        background-color: #fff;
+    	/* padding: 50px 15px; */
+    	min-height: 400px;
+    	background-color: #fff;
     }
-
-
-
+    
     .page-body .txt {
-        /* padding: 12px ; */
-        /* border: none; */
-        border-bottom: 1px solid #4fc08d;
-        background-color: transparent;
-        width: 100%;
-        font-size: 14px;
-        color: #313131;
+    	/* padding: 12px ; */
+    	/* border: none; */
+    	border-bottom: 1px solid #4fc08d;
+    	background-color: transparent;
+    	width: 100%;
+    	font-size: 14px;
+    	color: #313131;
     }
-
+    
     .btn {
-        display: inline-block;
-        width: 99%;
-        height: 42px;
-        line-height: 42px;
-        border-radius: 3px;
-        margin-top: 50px;
-        color: #fff;
-        font-size: 16px;
-        background-color: #87C701;
-        border: none;
-        border-bottom: 2px solid #87C701;
-        text-align: center;
-        vertical-align: middle;
+    	display: inline-block;
+    	width: 99%;
+    	height: 42px;
+    	line-height: 42px;
+    	border-radius: 3px;
+    	margin-top: 50px;
+    	color: #fff;
+    	font-size: 16px;
+    	background-color: #87c701;
+    	border: none;
+    	border-bottom: 2px solid #87c701;
+    	text-align: center;
+    	vertical-align: middle;
     }
-	.header-bg{
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		flex-flow: column;
-		background: #87C701;
-		color: #fff;
-		
-	}
-	.username{
-		padding: 20rpx;
-	}
-	.user-info{
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		
-	}
-	.user-info view{
-		padding: 20rpx;
-	}
-	
-	.detail-info{
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		
-		background: #eee;
-	}
-	.detail-info view{
-		height: 100rpx;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		flex:1;
-		border-bottom: 1px solid #87C701;
-		/* color: #87C701; */
-	}
-	.avatar{
-		margin: 20rpx;
-		width: 200rpx;
-		height: 200rpx;
-		border-radius: 50%;
-		background: rgba(0,0,0,0);
-	}
+    .header-bg {
+    	display: flex;
+    	justify-content: center;
+    	align-items: center;
+    	flex-flow: column;
+    	background: #87c701;
+    	color: #fff;
+    }
+    .username {
+    	padding: 20rpx;
+    }
+    .user-info {
+    	display: flex;
+    	justify-content: space-between;
+    	align-items: center;
+    }
+    .user-info view {
+    	padding: 20rpx;
+    }
+    
+    .detail-info {
+    	display: flex;
+    	justify-content: center;
+    	align-items: center;
+    
+    	background: #eee;
+    }
+    .detail-info view {
+    	height: 100rpx;
+    	display: flex;
+    	justify-content: center;
+    	align-items: center;
+    	flex: 1;
+    	
+    }
+    .detail-item{
+    	padding: 10px;
+    	
+    	border-bottom: 1px solid #eee;
+    }
+    	
+    .item-content{
+    	overflow: hidden;
+    	text-overflow: ellipsis;
+    	white-space: nowrap;
+    }
+    .active{
+    	border-bottom: 1px solid #87c701;
+    	color: #87C701;
+    }
+    .avatar {
+    	margin: 20rpx;
+    	width: 200rpx;
+    	height: 200rpx;
+    	border-radius: 50%;
+    	background: rgba(0, 0, 0, 0);
+    }
 </style>
